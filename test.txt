@@ -1,0 +1,6 @@
+programa foda () {%
+int := x, y, z
+if [ 3 + 4 > 2] then x := y
+while [x] do
+    x+3;
+%}
