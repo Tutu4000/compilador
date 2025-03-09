@@ -64,10 +64,6 @@ static int next_char() {
     return current_char;
 }
 
-static int is_digit(int c) {
-    return isdigit(c);
-}
-
 static int is_whitespace() {
     return current_char == ' ' || current_char == '\t' || 
            current_char == '\n' || current_char == '\r' ||
