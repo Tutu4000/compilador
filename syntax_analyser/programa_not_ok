@@ -1,0 +1,16 @@
+programa teste () {%
+    int: x, y;
+    x:= 3-2;
+    y:= 3*3+2;
+    z:= 3/3;
+    a:= 3
+
+    while[a < 6] {%
+        if [x = z] then
+            a:=5;
+        else
+            a:=7;
+        x:=0;
+    %}
+
+%}
