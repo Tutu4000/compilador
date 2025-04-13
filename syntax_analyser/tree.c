@@ -60,3 +60,24 @@ void tree_free(TreeNode *root) {
 
   free(root);
 }
+
+void tree_print(TreeNode *root, int level) {
+  if (root == NULL)
+    return;
+
+  // Imprime indentação baseada no nível
+  for (int i = 0; i < level; i++) {
+    printf("    "); // 4 espaços por nível
+  }
+
+  // Imprime informações do nó
+  printf("├── Valor: %d, Flag: %s\n", root->data.value,
+         root->data.flag ? "true" : "false");
+
+  // Percorre recursivamente todos os filhos
+  TreeNode *child = root->first_child;
+  while (child != NULL) {
+    tree_print(child, level + 1);
+    child = child->next_sibling;
+  }
+}

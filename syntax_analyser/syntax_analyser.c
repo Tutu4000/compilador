@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
       }
     } else {
       if (TABELA[X->value][value_prox_token] == 0) {
-        fprintf(stderr, "ERRO TABELA! %d,%d\n",X->value,value_prox_token);
+        fprintf(stderr, "ERRO TABELA! %d,%d,%d\n",X->value,value_prox_token,X->flag);
       } else {
         // Trata producao
         stack_pop(stack, element);
@@ -62,6 +62,10 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  while (tree->parent != NULL) {
+    tree = tree->parent;
+  }
+  tree_print(tree, 1);
   return 0;
 }
 
@@ -257,11 +261,23 @@ void process_production(Stack *s, TreeNode *tree, int production) {
 
   insertions = s->size - stack_initial_size;
   StackElement *element = (StackElement*)malloc(sizeof(StackElement));
+  
+  Stack* aux_stack = (Stack *)malloc(sizeof(Stack));
+  stack_init(aux_stack);
+
   for (int i = 0; i < insertions; i++) {
     stack_pop(s, element);
+    stack_push(aux_stack, element->value, element->flag);
+    
     TreeNode *child = tree_create_node(element->value, element->flag);
     tree_add_child(tree, child);
   }
+
+  for(int i = 0; i < insertions; i++){
+    stack_pop(aux_stack, element);
+    stack_push(s, element->value, element->flag);
+  }  
+  
   tree = tree->first_child;
 }
 
