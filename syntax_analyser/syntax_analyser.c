@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
   Token prox_token;
 
   Stack *stack = (Stack *)malloc(sizeof(Stack));
-  StackElement *X = NULL;
-  StackElement *element = NULL;
+  StackElement *X;
+  StackElement *element;
 
   TreeNode *tree = tree_create_node(ESTADO_INICIAL, false);
 

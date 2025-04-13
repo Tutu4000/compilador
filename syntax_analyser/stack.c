@@ -2,7 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void stack_init(Stack *stack) { stack->top = NULL; }
+void stack_init(Stack *stack) { 
+  stack->top = NULL; 
+  stack->size = 0;
+}
 
 bool stack_is_empty(Stack *stack) { return stack->top == NULL; }
 
@@ -35,7 +38,7 @@ bool stack_peek(Stack *stack, StackElement *out) {
   if (stack_is_empty(stack)) {
     return false;
   }
-  out = &stack->top->data;
+  *out = stack->top->data;
   return true;
 }
 
