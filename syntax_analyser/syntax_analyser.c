@@ -7,6 +7,83 @@
 #include <stdlib.h>
 
 void process_production(Stack *s, TreeNode *tree, int production);
+int map_lexer_token_to_table_token(int lexer_token);
+int map_lexer_token_to_table_token(int lexer_token) {
+    switch (lexer_token) {
+        case TK_ID:
+            return ID;
+        case TK_OPEN_BLOCK:
+            return OPEN_CURLY_PERCENT;
+        case TK_CLOSE_BLOCK:
+            return CLOSE_PERCENT_CURLY;
+        case TK_OPEN_PAREN:
+            return OPEN_PAREN;
+        case TK_CLOSE_PAREN:
+            return CLOSE_PAREN;
+        case TK_OPEN_BRACKET:
+            return OPEN_BRACKET;
+        case TK_CLOSE_BRACKET:
+            return CLOSE_BRACKET;
+        case TK_IF:
+            return IF;
+        case TK_THEN:
+            return THEN;
+        case TK_ELSEIF:
+            return ELSEIF;
+        case TK_ELSE:
+            return ELSE;
+        case TK_WHILE:
+            return WHILE;
+        case TK_DO:
+            return DO;
+        case TK_ASSIGN:
+            return ASSIGN;
+        case TK_COLON:
+            return COLON;
+        case TK_SEMICOLON:
+            return SEMICOLON;
+        case TK_COMMA:
+            return COMMA;
+        case TK_CONST_CHAR:
+            return CONST_CHAR;
+        case TK_CONST_INT:
+            return CONST_INT;
+        case TK_CONST_FLOAT:
+            return CONST_FLOAT;
+        case TK_CHAR:
+            return CHAR;
+        case TK_INT:
+            return INT;
+        case TK_FLOAT:
+            return FLOAT;
+        case TK_PROGRAMA:
+            return PROGRAMA;
+
+
+        case TK_SUM:
+        case TK_SUB:
+            return ARITOP_ADD;
+        case TK_MULT:
+        case TK_DIV:
+            return ARITOP_MULT;
+        case TK_POT:
+            return ARITOP_POT;
+        case TK_EQ:
+        case TK_NE:
+        case TK_LT:
+        case TK_GT:
+        case TK_LE:
+        case TK_GE:
+            return RELOP;
+
+        case TK_EOF:
+            return DOLLAR;
+        default:
+
+            fprintf(stderr, "Token %d\n", lexer_token);
+            return -1;
+    }
+}
 
 int main(int argc, char *argv[]) {
   FILE *input = fopen(argv[1], "r");
@@ -25,14 +102,17 @@ int main(int argc, char *argv[]) {
 
   stack_init(stack);
   stack_push(stack, ESTADO_INICIAL, false);
-
+  int value_prox_token;
   prox_token = get_token();
   while (!stack_is_empty(stack)) {
-    stack_peek(stack, X);
+    stack_peek(stack,X);
+    int current_token = map_lexer_token_to_table_token(prox_token.token);
+
     if (X->flag) {
-      if (X->value == prox_token.token) {
+      if (X->value == current_token) {
         stack_pop(stack, element);
         prox_token = get_token();
+        value_prox_token = map_lexer_token_to_table_token(prox_token.token);
         if (tree->next_sibling != NULL) {
           tree = tree->next_sibling;
         } else {
@@ -48,7 +128,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "ERRO DESEMPILHA\n");
       }
     } else {
-      if (TABELA[X->value][prox_token.token] == 0) {
+      if (TABELA[X->value][value_prox_token] == 0) {
         fprintf(stderr, "ERRO TABELA!\n");
       } else {
         // Trata producao
