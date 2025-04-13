@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["programa_foda"],
+      "cwd": "/home/ventinos/Documents/compilador/syntax_analyser",
+      "program": "/home/ventinos/Documents/compilador/syntax_analyser/a.out",
+    }
+  ]
+}
