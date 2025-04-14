@@ -16,6 +16,7 @@ void tree_add_child(TreeNode *parent, TreeNode *child);
 void tree_traverse(TreeNode *root); 
 void tree_free(TreeNode *root);
 void tree_print(TreeNode *root, int level);
+const char* print_v(int token, bool is_token);
 
 #endif 
 

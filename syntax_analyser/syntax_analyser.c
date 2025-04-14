@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+
 void process_production(Stack *s, TreeNode **tree, int production);
 int map_lexer_token_to_table_token(int lexer_token);
 const char* print_value(int token, bool is_token);
@@ -15,7 +17,7 @@ void stack_print(Stack *s);
 
 int main(int argc, char *argv[]) {
   (void)argc;
-  
+
   FILE *input = fopen(argv[1], "r");
   if (!input) {
     printf("Could not open file %s\n", argv[1]);
@@ -26,7 +28,7 @@ int main(int argc, char *argv[]) {
   Token prox_token;
   int current_token = 0;
   int value_prox_token = 0;
-  
+
   Stack *stack = (Stack *)malloc(sizeof(Stack));
   StackElement *X = (StackElement *)malloc(sizeof(StackElement));
   StackElement *element = (StackElement *)malloc(sizeof(StackElement));
@@ -35,7 +37,7 @@ int main(int argc, char *argv[]) {
 
   stack_init(stack);
   stack_push(stack, ESTADO_INICIAL, false);
-  
+
   prox_token = get_token();
   while (!stack_is_empty(stack)) {
     stack_pop(stack,X);
@@ -78,10 +80,6 @@ int main(int argc, char *argv[]) {
       } else {
 
         process_production(stack, &tree, TABELA[X->value][value_prox_token]);
-        fprintf(stdout,"\nf Raiz quando sai da função: %d e %d\n\n",tree->data.value, tree->data.flag);
-        if (tree->first_child!=NULL){
-          fprintf(stdout,"\nf filho raiz: %d e %d\n\n",tree->first_child->data.value, tree->first_child->data.flag);
-        }
       }
     }
   }
@@ -98,7 +96,7 @@ int main(int argc, char *argv[]) {
 }
 
 void process_production(Stack *s, TreeNode **tree, int production) {
-  //stack_print(s);
+
   int insertions = 0;
   int stack_initial_size = s->size;
   StackElement *element = (StackElement*)malloc(sizeof(StackElement));
@@ -307,11 +305,11 @@ void process_production(Stack *s, TreeNode **tree, int production) {
     stack_pop(aux_stack, element);
     stack_push(s, element->value, element->flag);
   }
-  fprintf(stdout,"\nf Raiz antiga: %d e %d",(*tree)->data.value, (*tree)->data.flag);
+
   if ((*tree)->first_child!=NULL) {
     *tree = (*tree)->first_child;
   }
-  fprintf(stdout,"\nf Raiz nova: %d e %d", (*tree)->data.value, (*tree)->data.flag);
+
 }
 
 int map_lexer_token_to_table_token(int lexer_token) {
@@ -390,7 +388,7 @@ int map_lexer_token_to_table_token(int lexer_token) {
             return -1;
     }
 
-    
+
 }
 
 const char* print_value(int token, bool is_token) {

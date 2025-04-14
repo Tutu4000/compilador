@@ -59,7 +59,7 @@
 #define NUM_SIMBOLOS 32 
 
 
-const int TABELA[NUM_ESTADOS][NUM_SIMBOLOS] = {
+int TABELA[NUM_ESTADOS][NUM_SIMBOLOS] = {
 
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
