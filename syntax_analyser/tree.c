@@ -190,11 +190,12 @@ void tree_print(TreeNode *node, int depth) {
     return;
   }
 
-
-  for (int i = 0; i < depth; i++) {
-    printf("  ");
+   if (depth > 0) {
+    for (int i = 0; i < depth - 1; i++) {
+      printf("│   ");
+    }
+    printf("├── ");
   }
-
 
   printf("%s\n", print_v(node->data.value, node->data.flag));
 
