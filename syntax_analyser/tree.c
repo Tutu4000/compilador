@@ -12,7 +12,7 @@ TreeNode *tree_create_node(int value, bool flag) {
   node->data.flag = flag;
   node->first_child = NULL;
   node->next_sibling = NULL;
-  node->parent = NULL; // inicializa sem pai
+  node->parent = NULL; 
   return node;
 }
 
@@ -20,7 +20,7 @@ void tree_add_child(TreeNode *parent, TreeNode *child) {
   if (!parent || !child)
     return;
 
-  child->parent = parent; // define o pai
+  child->parent = parent; 
 
   if (parent->first_child == NULL) {
     parent->first_child = child;
@@ -65,16 +65,16 @@ void tree_print(TreeNode *root, int level) {
   if (root == NULL)
     return;
 
-  // Imprime indentação baseada no nível
+  
   for (int i = 0; i < level; i++) {
-    printf("    "); // 4 espaços por nível
+    printf("    "); 
   }
 
-  // Imprime informações do nó
+  
   printf("├── Valor: %d, Flag: %s\n", root->data.value,
          root->data.flag ? "true" : "false");
 
-  // Percorre recursivamente todos os filhos
+  
   TreeNode *child = root->first_child;
   while (child != NULL) {
     tree_print(child, level + 1);

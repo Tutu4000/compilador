@@ -64,12 +64,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "ERRO TABELA! %d,%d,%d\n",X->value,value_prox_token,X->flag);
         return 1;
       } else {
-        // Trata producao
-        //int production = TABELA[X->value][value_prox_token];
-        
-        
-        
-        
         stack_pop(stack, element);
         process_production(stack, tree, TABELA[X->value][value_prox_token], value_prox_token);
       }
@@ -85,6 +79,7 @@ int main(int argc, char *argv[]) {
 void process_production(Stack *s, TreeNode *tree, int production, int prox_token) {
   int insertions = 0;
   int stack_initial_size = s->size;
+  StackElement *element = (StackElement*)malloc(sizeof(StackElement));
   printf("PRODUCTION=%d\n", production);
   switch (production) {
   case 1:
@@ -121,6 +116,7 @@ void process_production(Stack *s, TreeNode *tree, int production, int prox_token
     stack_push(s, COMMA, true);
     break;
   case 8:
+    stack_pop(s, element);
     stack_push(s, SEMICOLON, true);
     break;
   case 9:
@@ -255,15 +251,12 @@ void process_production(Stack *s, TreeNode *tree, int production, int prox_token
     stack_push(s, ID, true);
     break;
   case 40:
-    stack_push(s, SEMICOLON, true);
     stack_push(s, CONST_CHAR, true);
     break;
   case 41:
-    stack_push(s, SEMICOLON, true);
     stack_push(s, CONST_INT, true);
     break;
   case 42:
-    stack_push(s, SEMICOLON, true);
     stack_push(s, CONST_FLOAT, true);
     break;
   case 43:
@@ -276,8 +269,6 @@ void process_production(Stack *s, TreeNode *tree, int production, int prox_token
 }
 
   insertions = s->size - stack_initial_size;
-  StackElement *element = (StackElement*)malloc(sizeof(StackElement));
-
   for (int i = 0; i < insertions; i++) {
     stack_peek(s, element);
     

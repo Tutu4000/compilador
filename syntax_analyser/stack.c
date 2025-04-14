@@ -45,6 +45,5 @@ bool stack_peek(Stack *stack, StackElement *out) {
 void stack_free(Stack *stack) {
   StackElement temp;
   while (stack_pop(stack, &temp)) {
-    // apenas esvaziando
   }
 }
