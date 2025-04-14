@@ -6,19 +6,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void process_production(Stack *s, TreeNode *tree, int production);
+void process_production(Stack *s, TreeNode *tree, int production, int prox_token);
 int map_lexer_token_to_table_token(int lexer_token);
 
 int main(int argc, char *argv[]) {
   (void)argc;
+  
   FILE *input = fopen(argv[1], "r");
   if (!input) {
     printf("Could not open file %s\n", argv[1]);
     return 1;
   }
   init_lexer(input);
-  Token prox_token;
 
+  Token prox_token;
+  int current_token = 0;
+  int value_prox_token = 0;
+  
   Stack *stack = (Stack *)malloc(sizeof(Stack));
   StackElement *X = (StackElement *)malloc(sizeof(StackElement));
   StackElement *element = (StackElement *)malloc(sizeof(StackElement));
@@ -27,11 +31,13 @@ int main(int argc, char *argv[]) {
 
   stack_init(stack);
   stack_push(stack, ESTADO_INICIAL, false);
-  int value_prox_token;
+  
   prox_token = get_token();
   while (!stack_is_empty(stack)) {
     stack_peek(stack,X);
-    int current_token = map_lexer_token_to_table_token(prox_token.token);
+    current_token = map_lexer_token_to_table_token(prox_token.token);
+
+    printf("X->value=%d\tX->flag=%d\tprox->token=%d\n", X->value, X->flag, current_token);
 
     if (X->flag) {
       if (X->value == current_token) {
@@ -51,14 +57,17 @@ int main(int argc, char *argv[]) {
         }
       } else {
         fprintf(stderr, "ERRO DESEMPILHA\n");
+        return 1;
       }
     } else {
       if (TABELA[X->value][value_prox_token] == 0) {
         fprintf(stderr, "ERRO TABELA! %d,%d,%d\n",X->value,value_prox_token,X->flag);
+        return 1;
       } else {
         // Trata producao
+        //int production = TABELA[X->value][value_prox_token];
         stack_pop(stack, element);
-        process_production(stack, tree, element->value);
+        process_production(stack, tree, element->value, value_prox_token);
       }
     }
   }
@@ -69,9 +78,10 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void process_production(Stack *s, TreeNode *tree, int production) {
+void process_production(Stack *s, TreeNode *tree, int production, int prox_token) {
   int insertions = 0;
   int stack_initial_size = s->size;
+  printf("PRODUCTION=%d\n", production);
   switch (production) {
   case 0:
     stack_push(s, ESTADO_BLOCO, false);
@@ -104,6 +114,19 @@ void process_production(Stack *s, TreeNode *tree, int production) {
     break;
   case 6:
     stack_push(s, ESTADO_LISTA_IDS, false);
+    switch(prox_token){
+      case INT:
+        stack_push(s, INT, true);
+        break;
+      case CHAR:
+        stack_push(s, CHAR, true);
+        break;
+      case FLOAT:
+        stack_push(s, FLOAT, true);
+        break;
+      default:
+        fprintf(stderr, "ERROR DECLARACOES ERRADAS\n");
+    }
     break;
   case 7:
     break;
