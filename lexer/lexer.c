@@ -43,11 +43,10 @@ static Token create_token(int token_type) {
   token.token = token_type;
   strcpy(token.lexeme, lexeme);
   token.pos = token_start_pos;
-  token.symbol_table_index = -1; // not in symbol table
+  token.symbol_table_index = -1;
   return token;
 }
 
-// get next char and update position
 static int next_char() {
   current_char = getc(input_file);
   if (current_char == '\n') {
@@ -74,7 +73,6 @@ static void skip_whitespace() {
   mark_token_start();
 }
 
-// Symbol table functions
 Symbol *lookup_symbol(const char *lexeme) {
   for (int i = 0; i < symbol_count; i++) {
     if (strcmp(symbol_table[i].lexeme, lexeme) == 0) {
@@ -134,10 +132,8 @@ void print_symbol_table() {
   }
 }
 
-// <type, value>
 void print_token(Token token) {
   switch (token.token) {
-  // reserved words
   case TK_PROGRAMA:
   case TK_IF:
   case TK_THEN:
@@ -151,7 +147,6 @@ void print_token(Token token) {
     printf("<%s, - >", token.lexeme);
     break;
 
-  // positions on symbol table for consts and ids
   case TK_CONST_INT:
   case TK_CONST_FLOAT:
   case TK_CONST_CHAR:
@@ -164,7 +159,6 @@ void print_token(Token token) {
            token.symbol_table_index);
     break;
 
-  // relops
   case TK_LT:
     printf("<relop, < >");
     break;
@@ -184,7 +178,6 @@ void print_token(Token token) {
     printf("<relop, <> >");
     break;
 
-  // other
   case TK_ASSIGN:
     printf("<:=, - >");
     break;
@@ -250,7 +243,7 @@ Token get_token() {
 
   while (1) {
     switch (state) {
-    case 1: // whitespace
+    case 1:
       if (is_whitespace()) {
         skip_whitespace();
       } else {
@@ -259,11 +252,11 @@ Token get_token() {
       state = 2;
       break;
 
-    case 2: // restart
+    case 2:
       state = 0;
       break;
 
-    case 0: // initial state
+    case 0:
       if (current_char == EOF) {
         return create_token(TK_EOF);
       }
@@ -363,7 +356,7 @@ Token get_token() {
       }
       break;
 
-    case 3: // ID state
+    case 3:
       while (isalnum(current_char) || current_char == '_') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -371,7 +364,7 @@ Token get_token() {
       state = 4;
       break;
 
-    case 4: // ID or reserved word
+    case 4:
       if (strcmp(lexeme, "programa") == 0)
         return create_token(TK_PROGRAMA);
       if (strcmp(lexeme, "if") == 0)
@@ -393,16 +386,15 @@ Token get_token() {
       if (strcmp(lexeme, "float") == 0)
         return create_token(TK_FLOAT);
 
-      // if not reserved, it's ID
       token = create_token(TK_ID);
       Symbol *sym = lookup_symbol(lexeme);
       if (sym == NULL) {
         sym = insert_symbol(lexeme, TK_ID, NULL);
       }
-      token.symbol_table_index = sym - symbol_table; // position in symbol table
+      token.symbol_table_index = sym - symbol_table;
       return token;
 
-    case 5: // after <
+    case 5:
       if (current_char == '>') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -416,19 +408,19 @@ Token get_token() {
       }
       break;
 
-    case 6: // <>
+    case 6:
       return create_token(TK_NE);
 
-    case 7: // <=
+    case 7:
       return create_token(TK_LE);
 
-    case 8: // <
+    case 8:
       return create_token(TK_LT);
 
-    case 9: // =
+    case 9:
       return create_token(TK_EQ);
 
-    case 10: // after >
+    case 10:
       if (current_char == '=') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -438,13 +430,13 @@ Token get_token() {
       }
       break;
 
-    case 11: // >=
+    case 11:
       return create_token(TK_GE);
 
-    case 12: // >
+    case 12:
       return create_token(TK_GT);
 
-    case 13: // first digit read
+    case 13:
       while (isdigit(current_char)) {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -462,14 +454,14 @@ Token get_token() {
       }
       break;
 
-    case 14: // integer
+    case 14:
       token = create_token(TK_CONST_INT);
       token.value.int_value = atoi(lexeme);
       sym = insert_symbol(lexeme, TK_CONST_INT, &token.value.int_value);
       token.symbol_table_index = sym - symbol_table;
       return token;
 
-    case 15: // after .
+    case 15:
       if (isdigit(current_char)) {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -481,7 +473,7 @@ Token get_token() {
       }
       break;
 
-    case 16: // digits after .
+    case 16:
       while (isdigit(current_char)) {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -495,14 +487,14 @@ Token get_token() {
       }
       break;
 
-    case 17: // float
+    case 17:
       token = create_token(TK_CONST_FLOAT);
       token.value.float_value = atof(lexeme);
       sym = insert_symbol(lexeme, TK_CONST_FLOAT, &token.value.float_value);
       token.symbol_table_index = sym - symbol_table;
       return token;
 
-    case 18: // after E, scientific notation
+    case 18:
       if (current_char == '+' || current_char == '-') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -518,7 +510,7 @@ Token get_token() {
       }
       break;
 
-    case 19: // after +/- in exponent
+    case 19:
       if (isdigit(current_char)) {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -530,7 +522,7 @@ Token get_token() {
       }
       break;
 
-    case 20: // digits in exponent
+    case 20:
       while (isdigit(current_char)) {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -538,14 +530,14 @@ Token get_token() {
       state = 21;
       break;
 
-    case 21: // float with exponent
+    case 21:
       token = create_token(TK_CONST_FLOAT);
       token.value.float_value = atof(lexeme);
       sym = insert_symbol(lexeme, TK_CONST_FLOAT, &token.value.float_value);
       token.symbol_table_index = sym - symbol_table;
       return token;
 
-    case 22: // after '
+    case 22:
       if (current_char == EOF || current_char == '\n') {
         printf("Error at line %d, column %d: Unclosed character literal\n",
                current_pos.line, current_pos.column);
@@ -556,7 +548,7 @@ Token get_token() {
       state = 23;
       break;
 
-    case 23: // after char content
+    case 23:
       if (current_char == '\'') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -569,20 +561,20 @@ Token get_token() {
       }
       break;
 
-    case 24: // char literal
+    case 24:
       token = create_token(TK_CONST_CHAR);
       token.value.char_value = lexeme[1];
       sym = insert_symbol(lexeme, TK_CONST_CHAR, &token.value.char_value);
       token.symbol_table_index = sym - symbol_table;
       return token;
 
-    case 25: // +
+    case 25:
       return create_token(TK_SUM);
 
-    case 26: // -
+    case 26:
       return create_token(TK_SUB);
 
-    case 27: // *
+    case 27:
       if (current_char == '*') {
         state = 28;
         add_to_lexeme(current_char);
@@ -592,16 +584,16 @@ Token get_token() {
       }
       break;
 
-    case 28: // **
+    case 28:
       return create_token(TK_POT);
 
-    case 29: // *
+    case 29:
       return create_token(TK_MULT);
 
-    case 30: // /
+    case 30:
       return create_token(TK_DIV);
 
-    case 32: // {
+    case 32:
       if (current_char == '%') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -617,7 +609,7 @@ Token get_token() {
       }
       break;
 
-    case 33: // comment content
+    case 33:
       while (current_char != '#' && current_char != EOF) {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -627,7 +619,7 @@ Token get_token() {
                current_pos.line, current_pos.column);
         return create_token(TK_ERROR);
       }
-      add_to_lexeme(current_char); // add the #
+      add_to_lexeme(current_char);
       current_char = next_char();
       if (current_char == '}') {
         add_to_lexeme(current_char);
@@ -638,7 +630,7 @@ Token get_token() {
              current_pos.line, current_pos.column);
       return create_token(TK_ERROR);
 
-    case 36: // :
+    case 36:
       if (current_char == '=') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -648,25 +640,25 @@ Token get_token() {
       }
       break;
 
-    case 37: // :=
+    case 37:
       return create_token(TK_ASSIGN);
 
-    case 38: // :
+    case 38:
       return create_token(TK_COLON);
 
-    case 39: // ;
+    case 39:
       return create_token(TK_SEMICOLON);
 
-    case 40: // ,
+    case 40:
       return create_token(TK_COMMA);
 
-    case 41: // [
+    case 41:
       return create_token(TK_OPEN_BRACKET);
 
-    case 42: // ]
+    case 42:
       return create_token(TK_CLOSE_BRACKET);
 
-    case 43: // after %
+    case 43:
       if (current_char == '}') {
         add_to_lexeme(current_char);
         current_char = next_char();
@@ -678,13 +670,13 @@ Token get_token() {
       }
       break;
 
-    case 44: // %}
+    case 44:
       return create_token(TK_CLOSE_BLOCK);
 
-    case 45: // (
+    case 45:
       return create_token(TK_OPEN_PAREN);
 
-    case 46: // )
+    case 46:
       return create_token(TK_CLOSE_PAREN);
     }
   }
