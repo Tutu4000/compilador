@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void process_production(Stack *s, TreeNode *tree, int production, int prox_token);
+void process_production(Stack *s, TreeNode *tree, int production);
 int map_lexer_token_to_table_token(int lexer_token);
+const char* token_to_str(int token);
+
 
 int main(int argc, char *argv[]) {
   (void)argc;
@@ -37,8 +39,6 @@ int main(int argc, char *argv[]) {
     stack_peek(stack,X);
     current_token = map_lexer_token_to_table_token(prox_token.token);
 
-    printf("X->value=%d\tX->flag=%d\tprox->token=%d\n", X->value, X->flag, current_token);
-
     if (X->flag) {
       if (X->value == current_token) {
         stack_pop(stack, element);
@@ -56,18 +56,31 @@ int main(int argc, char *argv[]) {
           }
         }
       } else {
-        fprintf(stderr, "ERRO DESEMPILHA\n");
+        fprintf(stderr,
+        "Erro de casação: esperava token %d (%s), mas encontrou token %d (%s) \n",
+        X->value, token_to_str(X->value),
+        current_token, token_to_str(prox_token.token));
+
         return 1;
       }
     } else {
       if (TABELA[X->value][value_prox_token] == 0) {
-        fprintf(stderr, "ERRO TABELA! %d,%d,%d\n",X->value,value_prox_token,X->flag);
+        fprintf(stderr,
+        "Erro de sintaxe: produção inválida na tabela para não-terminal %d (%s) com token de entrada %d (%s) \n",
+        X->value, token_to_str(X->value),
+        value_prox_token, token_to_str(prox_token.token));
+
         return 1;
       } else {
         stack_pop(stack, element);
-        process_production(stack, tree, TABELA[X->value][value_prox_token], value_prox_token);
+        process_production(stack, tree, TABELA[X->value][value_prox_token]);
       }
     }
+  }
+  if (prox_token.token != TK_EOF) {
+    fprintf(stderr, "Erro de sintaxe: esperava EOF, mas encontrou token %d (%s) \n",
+    prox_token.token, token_to_str(prox_token.token));
+    return 1;
   }
   while (tree->parent != NULL) {
     tree = tree->parent;
@@ -76,11 +89,10 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void process_production(Stack *s, TreeNode *tree, int production, int prox_token) {
+void process_production(Stack *s, TreeNode *tree, int production) {
   int insertions = 0;
   int stack_initial_size = s->size;
   StackElement *element = (StackElement*)malloc(sizeof(StackElement));
-  printf("PRODUCTION=%d\n", production);
   switch (production) {
   case 1:
     stack_push(s, ESTADO_BLOCO, false);
@@ -264,7 +276,7 @@ void process_production(Stack *s, TreeNode *tree, int production, int prox_token
   case 45:
     break;
   default:
-    fprintf(stderr, "ERRO DESCONHECIDO %d\n", production);
+    fprintf(stderr, "Comando não encontrado \n");
     exit(1);
 }
 
@@ -354,4 +366,42 @@ int map_lexer_token_to_table_token(int lexer_token) {
             fprintf(stderr, "Token %d\n", lexer_token);
             return -1;
     }
+
+    
+}
+
+const char* token_to_str(int token) {
+  switch (token) {
+      case ID: return "ID";
+      case OPEN_CURLY_PERCENT: return "{%";
+      case CLOSE_PERCENT_CURLY: return "%}";
+      case OPEN_PAREN: return "(";
+      case CLOSE_PAREN: return ")";
+      case OPEN_BRACKET: return "[";
+      case CLOSE_BRACKET: return "]";
+      case IF: return "if";
+      case THEN: return "then";
+      case ELSEIF: return "elseif";
+      case ELSE: return "else";
+      case WHILE: return "while";
+      case DO: return "do";
+      case ASSIGN: return ":=";
+      case COLON: return ":";
+      case SEMICOLON: return ";";
+      case COMMA: return ",";
+      case CONST_CHAR: return "const_char";
+      case CONST_INT: return "const_int";
+      case CONST_FLOAT: return "const_float";
+      case CHAR: return "char";
+      case INT: return "int";
+      case FLOAT: return "float";
+      case PROGRAMA: return "programa";
+      case ARITOP_ADD: return "soma/sub";
+      case ARITOP_MULT: return "mult/div";
+      case ARITOP_POT: return "potência";
+      case RELOP: return "relop";
+      case DOLLAR: return "$";
+      default: return "desconhecido";
+  }
+
 }
