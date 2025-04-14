@@ -8,7 +8,9 @@
 
 void process_production(Stack *s, TreeNode *tree, int production);
 int map_lexer_token_to_table_token(int lexer_token);
-const char* token_to_str(int token);
+const char* print_value(int token, bool is_token);
+void stack_print(Stack *s);
+
 
 
 int main(int argc, char *argv[]) {
@@ -36,12 +38,12 @@ int main(int argc, char *argv[]) {
   
   prox_token = get_token();
   while (!stack_is_empty(stack)) {
-    stack_peek(stack,X);
+    stack_pop(stack,X);
     current_token = map_lexer_token_to_table_token(prox_token.token);
+
 
     if (X->flag) {
       if (X->value == current_token) {
-        stack_pop(stack, element);
         prox_token = get_token();
         value_prox_token = map_lexer_token_to_table_token(prox_token.token);
         if (tree->next_sibling != NULL) {
@@ -57,29 +59,33 @@ int main(int argc, char *argv[]) {
         }
       } else {
         fprintf(stderr,
-        "Erro de casação: esperava token %d (%s), mas encontrou token %d (%s) \n",
-        X->value, token_to_str(X->value),
-        current_token, token_to_str(prox_token.token));
+        "Erro de casação: esperava %d (%s), mas encontrou %d (%s) \n",
+        X->value, print_value(X->value, X->flag),
+        current_token, print_value(current_token, true));
+        fprintf(stderr,"Linha %d\nColuna %d\n", prox_token.pos.line, prox_token.pos.column);
 
         return 1;
       }
     } else {
       if (TABELA[X->value][value_prox_token] == 0) {
         fprintf(stderr,
-        "Erro de sintaxe: produção inválida na tabela para não-terminal %d (%s) com token de entrada %d (%s) \n",
-        X->value, token_to_str(X->value),
-        value_prox_token, token_to_str(prox_token.token));
+        "Erro de sintaxe: produção inválida na tabela paral %d (%s) com entrada %d (%s) \n",
+        X->value, print_value(X->value, X->flag),
+        value_prox_token, print_value(current_token, true));
+        fprintf(stderr,"Linha %d\nColuna %d\n", prox_token.pos.line, prox_token.pos.column);
 
         return 1;
       } else {
-        stack_pop(stack, element);
+
         process_production(stack, tree, TABELA[X->value][value_prox_token]);
+        fprintf(stdout,"\nf Raiz quando sai da função: %d e %d\n\n",tree->data.value, tree->data.flag);
+        fprintf(stdout,"\nf filho raiz: %d e %d\n\n",tree->first_child->data.value, tree->first_child->data.flag);
       }
     }
   }
   if (prox_token.token != TK_EOF) {
-    fprintf(stderr, "Erro de sintaxe: esperava EOF, mas encontrou token %d (%s) \n",
-    prox_token.token, token_to_str(prox_token.token));
+    fprintf(stderr, "Erro de sintaxe: esperava EOF, mas encontrou %d (%s) \n",
+    prox_token.token, print_value(X->value, X->flag));
     return 1;
   }
   while (tree->parent != NULL) {
@@ -90,6 +96,7 @@ int main(int argc, char *argv[]) {
 }
 
 void process_production(Stack *s, TreeNode *tree, int production) {
+  //stack_print(s);
   int insertions = 0;
   int stack_initial_size = s->size;
   StackElement *element = (StackElement*)malloc(sizeof(StackElement));
@@ -259,7 +266,6 @@ void process_production(Stack *s, TreeNode *tree, int production) {
     stack_push(s, OPEN_PAREN, true);
     break;
   case 39:
-    stack_push(s, SEMICOLON, true);
     stack_push(s, ID, true);
     break;
   case 40:
@@ -281,14 +287,30 @@ void process_production(Stack *s, TreeNode *tree, int production) {
 }
 
   insertions = s->size - stack_initial_size;
+
+  Stack* aux_stack = (Stack *)malloc(sizeof(Stack));
+  stack_init(aux_stack);
+
+
   for (int i = 0; i < insertions; i++) {
-    stack_peek(s, element);
-    
+    stack_pop(s, element);
+    stack_push(aux_stack, element->value, element->flag);
+
     TreeNode *child = tree_create_node(element->value, element->flag);
+
     tree_add_child(tree, child);
   }
-  
+
+  for(int i = 0; i < insertions; i++){
+    stack_pop(aux_stack, element);
+    stack_push(s, element->value, element->flag);
+  }
+  fprintf(stdout,"\nf Raiz antiga: %d e %d",tree->data.value, tree->data.flag);
   tree = tree->first_child;
+  fprintf(stdout,"\nf Raiz nova: %d e %d",tree->data.value, tree->data.flag);
+
+  //stack_print(s);
+
 }
 
 int map_lexer_token_to_table_token(int lexer_token) {
@@ -370,8 +392,9 @@ int map_lexer_token_to_table_token(int lexer_token) {
     
 }
 
-const char* token_to_str(int token) {
-  switch (token) {
+const char* print_value(int token, bool is_token) {
+  if (is_token) {
+    switch (token) {
       case ID: return "ID";
       case OPEN_CURLY_PERCENT: return "{%";
       case CLOSE_PERCENT_CURLY: return "%}";
@@ -402,6 +425,49 @@ const char* token_to_str(int token) {
       case RELOP: return "relop";
       case DOLLAR: return "$";
       default: return "desconhecido";
+    }
+  } else {
+    switch (token) {
+      case ESTADO_INICIAL: return "ESTADO_INICIAL";
+      case ESTADO_NOME_PROGRAMA: return "ESTADO_NOME_PROGRAMA";
+      case ESTADO_BLOCO: return "ESTADO_BLOCO";
+      case ESTADO_DECLARACOES: return "ESTADO_DECLARACOES";
+      case ESTADO_LISTA_IDS: return "ESTADO_LISTA_IDS";
+      case ESTADO_LISTA_IDS_LINHA: return "ESTADO_LISTA_IDS_LINHA";
+      case ESTADO_PRIMITIVO: return "ESTADO_PRIMITIVO";
+      case ESTADO_COMANDOS: return "ESTADO_COMANDOS";
+      case ESTADO_COMANDOS_LINHA: return "ESTADO_COMANDOS_LINHA";
+      case ESTADO_COMANDO: return "ESTADO_COMANDO";
+      case ESTADO_COMANDO_LINHA: return "ESTADO_COMANDO_LINHA";
+      case ESTADO_ELSEIFS: return "ESTADO_ELSEIFS";
+      case ESTADO_ELSEIFS_LINHA: return "ESTADO_ELSEIFS_LINHA";
+      case ESTADO_CONDICAO: return "ESTADO_CONDICAO";
+      case ESTADO_EXPRESSAO: return "ESTADO_EXPRESSAO";
+      case ESTADO_EXPRESSAO_LINHA: return "ESTADO_EXPRESSAO_LINHA";
+      case ESTADO_TERMO: return "ESTADO_TERMO";
+      case ESTADO_TERMO_LINHA: return "ESTADO_TERMO_LINHA";
+      case ESTADO_POTENCIA: return "ESTADO_POTENCIA";
+      case ESTADO_POTENCIA_LINHA: return "ESTADO_POTENCIA_LINHA";
+      case ESTADO_FATOR: return "ESTADO_FATOR";
+      case ESTADO_WS: return "ESTADO_WS";
+      default: return "desconhecido";
+    }
+  }
+}
+
+
+void stack_print(Stack *s) {
+  StackNode* current = s->top;
+
+  if (current == NULL) {
+    printf("A pilha está vazia.\n");
+    return;
   }
 
+  printf("Elementos da pilha:\n");
+  while (current != NULL) {
+    StackElement el = current->data;
+    printf("Pilha: %s, Flag: %s\n", print_value(el.value, el.flag), el.flag ? "verdadeiro" : "falso");
+    current = current->next;
+  }
 }

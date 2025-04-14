@@ -20,7 +20,8 @@ void tree_add_child(TreeNode *parent, TreeNode *child) {
   if (!parent || !child)
     return;
 
-  child->parent = parent; 
+  child->parent = parent;
+
 
   if (parent->first_child == NULL) {
     parent->first_child = child;
@@ -61,23 +62,24 @@ void tree_free(TreeNode *root) {
   free(root);
 }
 
-void tree_print(TreeNode *root, int level) {
-  if (root == NULL)
+void tree_print(TreeNode *node, int depth) {
+  if (node == NULL) {
     return;
-
-  
-  for (int i = 0; i < level; i++) {
-    printf("    "); 
   }
 
-  
-  printf("├── Valor: %d, Flag: %s\n", root->data.value,
-         root->data.flag ? "true" : "false");
-
-  
-  TreeNode *child = root->first_child;
-  while (child != NULL) {
-    tree_print(child, level + 1);
-    child = child->next_sibling;
+  // Indenta a árvore conforme a profundidade
+  for (int i = 0; i < depth; i++) {
+    printf("  "); // Imprime espaços para o nível de profundidade
   }
+
+  // Imprime o valor do nó
+  printf("%d\n", node->data.value);
+
+  // Chama recursivamente para o primeiro filho
+  tree_print(node->first_child, depth + 1);
+
+  // Chama recursivamente para os irmãos
+  tree_print(node->next_sibling, depth);
 }
+
+

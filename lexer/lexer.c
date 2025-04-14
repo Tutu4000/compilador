@@ -262,7 +262,7 @@ Token get_token() {
       }
 
       if (is_whitespace()) {
-        add_to_lexeme(current_char);
+        //add_to_lexeme(current_char);
         state = 1;
         break;
       }

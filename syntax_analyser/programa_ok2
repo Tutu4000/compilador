@@ -1,11 +1,12 @@
 programa teste () {%
     int: x, y;
+    float: x, z, a;
     x:= 3-2;
     y:= 3*3+2;
     z:= 3/3;
-    a:= 3
+    a:= 3;
 
-    while[a < 6] {%
+    while [a < 6] do {%
         if [x = z] then
             a:=5;
         else
