@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void process_production(Stack *s, TreeNode *tree, int production);
+void process_production(Stack *s, TreeNode **tree, int production);
 int map_lexer_token_to_table_token(int lexer_token);
 const char* print_value(int token, bool is_token);
 void stack_print(Stack *s);
@@ -77,9 +77,11 @@ int main(int argc, char *argv[]) {
         return 1;
       } else {
 
-        process_production(stack, tree, TABELA[X->value][value_prox_token]);
+        process_production(stack, &tree, TABELA[X->value][value_prox_token]);
         fprintf(stdout,"\nf Raiz quando sai da função: %d e %d\n\n",tree->data.value, tree->data.flag);
-        fprintf(stdout,"\nf filho raiz: %d e %d\n\n",tree->first_child->data.value, tree->first_child->data.flag);
+        if (tree->first_child!=NULL){
+          fprintf(stdout,"\nf filho raiz: %d e %d\n\n",tree->first_child->data.value, tree->first_child->data.flag);
+        }
       }
     }
   }
@@ -95,7 +97,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void process_production(Stack *s, TreeNode *tree, int production) {
+void process_production(Stack *s, TreeNode **tree, int production) {
   //stack_print(s);
   int insertions = 0;
   int stack_initial_size = s->size;
@@ -298,19 +300,18 @@ void process_production(Stack *s, TreeNode *tree, int production) {
 
     TreeNode *child = tree_create_node(element->value, element->flag);
 
-    tree_add_child(tree, child);
+    tree_add_child(*tree, child);
   }
 
   for(int i = 0; i < insertions; i++){
     stack_pop(aux_stack, element);
     stack_push(s, element->value, element->flag);
   }
-  fprintf(stdout,"\nf Raiz antiga: %d e %d",tree->data.value, tree->data.flag);
-  tree = tree->first_child;
-  fprintf(stdout,"\nf Raiz nova: %d e %d",tree->data.value, tree->data.flag);
-
-  //stack_print(s);
-
+  fprintf(stdout,"\nf Raiz antiga: %d e %d",(*tree)->data.value, (*tree)->data.flag);
+  if ((*tree)->first_child!=NULL) {
+    *tree = (*tree)->first_child;
+  }
+  fprintf(stdout,"\nf Raiz nova: %d e %d", (*tree)->data.value, (*tree)->data.flag);
 }
 
 int map_lexer_token_to_table_token(int lexer_token) {
